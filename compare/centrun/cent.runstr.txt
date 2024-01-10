@@ -1,0 +1,12 @@
+./run.cpede.r common.r ../pwms/ ../tmp/5e+06/ ../out/5e+06/ ../rdata/samp5000000.RData 139
+./run.cpede.r common.r ../pwms/ ../tmp/5e+06/ ../out/5e+06/ ../rdata/samp5000000.RData 59
+./run.cpede.r common.r ../pwms/ ../tmp/5e+06/ ../out/5e+06/ ../rdata/samp5000000.RData 98
+./run.cpede.r common.r ../pwms/ ../tmp/5e+06/ ../out/5e+06/ ../rdata/samp5000000.RData 99
+./run.cpede.r common.r ../pwms/ ../tmp/5e+06/ ../out/5e+06/ ../rdata/samp5000000.RData 151
+./run.cpede.r common.r ../pwms/ ../tmp/5e+06/ ../out/5e+06/ ../rdata/samp5000000.RData 60
+./run.cpede.r common.r ../pwms/ ../tmp/5e+06/ ../out/5e+06/ ../rdata/samp5000000.RData 691
+./run.cpede.r common.r ../pwms/ ../tmp/5e+06/ ../out/5e+06/ ../rdata/samp5000000.RData 138
+./run.cpede.r common.r ../pwms/ ../tmp/5e+06/ ../out/5e+06/ ../rdata/samp5000000.RData 175
+./run.cpede.r common.r ../pwms/ ../tmp/5e+06/ ../out/5e+06/ ../rdata/samp5000000.RData 138
+./run.cpede.r common.r ../pwms/ ../tmp/5e+06/ ../out/5e+06/ ../rdata/samp5000000.RData 178
+./run.cpede.r common.r ../pwms/ ../tmp/5e+06/ ../out/5e+06/ ../rdata/samp5000000.RData 700
