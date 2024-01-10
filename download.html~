@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+<title>PIQ</title>
+
+<link rel="stylesheet" href="style.css" TYPE="text/css" MEDIA="screen">
+
+</head>
+
+<body>
+
+<h1><a href="http://piq.csail.mit.edu"><font color="#000000">PIQ: Protein Interaction Quantification</font></a></h1>
+
+<table>
+
+<tr>
+<td class="toplinks"><a href="index.html">PIQ Overview</a></td>
+<td class="toplinks"><a href="algorithm.html">Algorithm Design</a></td>
+<td class="toplinks"><a href="results.html">Results</a></td>
+<td class="toplinks"><a href="download.html">Code</a></td>
+<td class="toplinks"><a href="contact.html">Contact</a></td>
+</tr>
+
+</tr>
+
+<tr><td class="spacer"></td></tr>
+
+<tr><td colspan=6 class="refbody">
+
+<p>
+There are two versions of piq: an actively developed version for non-amazon use cases and an older unmaintained version that requires the use of Amazon EC2 and was used in our manuscript. All bugs should be reported to the issue tracker and not via email.
+</p>
+
+<p>
+The newest revision of PIQ is available from our bitbucket repository  <a href=""> here </a>. This version can be run single-core with the only dependency being R and bioconductor packages.
+</p>
+
+<p>
+EC2 Image can be found at <a href="http://piq.csail.mit.edu/download/ec2.bz2">ec2.bz2</a>. This is a EC2 EBS bundle that can be uploaded using instructions <a href="http://www.dowdandassociates.com/content/howto-convert-an-amazon-ec2-ebs-image-to-an-instance-store-image/">here</a>
+</p>
+
+<p>
+The main scripts for PIQ can be found at <a href="https://bitbucket.org/thashim/piq/admin"> our bitbucket repository </a>, place bams in the input/bams directory, fill out the piqscript.sh file, and tweak parameters in scripts/processbam.r and scripts/allscript.r.
+</p>
+
+</td></tr></table>
+
+</body>
+
+</html>
+    
+
+

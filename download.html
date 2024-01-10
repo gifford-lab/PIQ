@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+<title>PIQ</title>
+
+<link rel="stylesheet" href="style.css" TYPE="text/css" MEDIA="screen">
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-47613584-2', 'mit.edu');
+  ga('send', 'pageview');
+
+function trackOutboundLink(link, category, action) {
+
+try {
+_gaq.push(['_trackEvent', category , action]);
+} catch(err){}
+
+setTimeout(function() {
+document.location.href = link.href;
+}, 100);
+}
+</script>
+
+
+</head>
+
+<body>
+
+<h1><a href="http://piq.csail.mit.edu"><font color="#000000">PIQ: Protein Interaction Quantification</font></a></h1>
+
+<table>
+
+<tr>
+<td class="toplinks"><a href="index.html">PIQ Overview</a></td>
+<td class="toplinks"><a href="algorithm.html">Algorithm Design</a></td>
+<td class="toplinks"><a href="results.html">Binding calls</a></td>
+<td class="toplinks"><a href="download.html">Code</a></td>
+<td class="toplinks"><a href="contact.html">Contact</a></td>
+</tr>
+
+</tr>
+
+<tr><td class="spacer"></td></tr>
+
+<tr><td colspan=6 class="refbody">
+
+<p>
+PIQ is a easy-to-use set of 3 scripts which take as input a BAM file, JASPAR formatted motif file and outputs a set of binding site calls and analysis for diagnosing binding accuracy. PIQ depends only on the ability to run R, and either knowledge of running bash scripts or R scripting.
+</p>
+
+<p>
+The actively developed branch of PIQ is available from our bitbucket repository  <a href="https://bitbucket.org/thashim/piq-single"> here </a>.
+</p>
+
+<p>
+The newest stable code release is version 1.3 (rev 9c1dad8) and can be downloaded directly from <a href="https://bitbucket.org/thashim/piq-single/get/master.zip" onClick="trackOutboundLink(this, 'Downloads', 'piqcode'); return false;"> bitbucket </a>
+</p>
+
+<p>
+Matched sets of calls for the major release, v1.3 (rev 9c1dad8) are available <a href="data/v1.3.calls/"> here </a>.
+</p>
+
+</p>
+
+<p>
+Older scripts for PIQ can be found at <a href="https://bitbucket.org/thashim/piq"> our bitbucket repository </a> and our EC2 Image can be found at <a href="http://piq.csail.mit.edu/download/ec2.bz2">ec2.bz2</a>. Please see bitbucket repo for documentation.
+</p>
+
+</td></tr></table>
+
+</body>
+
+</html>
