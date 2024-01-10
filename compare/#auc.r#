@@ -1,0 +1,197 @@
+chipdir = '/cluster/thashim/scratch/DNAse/chipseqk562/'
+piqdir = '/cluster/thashim/PIQ/141105-3618f89-hg19k562.calls/'
+#piqdir = '/cluster/thashim/PIQ/141120.k562.calls/'
+
+require('GenomicRanges')
+lfchip=list.files(chipdir,recursive=T,full.names=T)
+lfchip=lfchip[grep('gz$',lfchip)]
+chip=lapply(1:length(lfchip),function(i){
+    scs=scan(lfchip[i],what=list('',integer(0),integer(0)),flush=T,skip=1)
+    sort(GRanges(seqnames=substr(scs[[1]],4,10),IRanges(start=scs[[2]],end=scs[[3]]),score=rep(i,length(scs[[1]]))))
+})
+
+chipnames=sapply(strsplit(lfchip,'/'),function(i){rev(i)[1]})
+tfnames=c('Atf3','Bcl3','Bclaf1','Cbx3','Cebpb','Cebpd','Creb1','Ctcf','Ctcfl','E2f6','Egr1','Elf1','Ets1','Fosl1','Gabp','Gata2','Hdac2','Hey1','Max','Mef2a','Nr2f2','Nrsf','Pml','Pol2','Pu1','Rad21','Sin3a','Six5','Sp1','Sp2','Srf','Stat5a','Taf1','Taf7','Tead4','Thap1','Trim28','Usf1','Yy1','Zbtb33','Zbtb7a','Arid3a','Atf1','Bach1','Bdp1','Bhlhe40','Brf1','Brf2','Brg1','Ccnt2','Cdpsc6327','Cfos','Chd2','Cjun','Cmyc','Corest','Ctcf','E2f4','E2f6','Elk1','Gata1','Gata2','Gtf2b','Gtf2f1','Hcfc1','Hmgn3','Ini1','Irf1','Jund','Kap1','Maff','Mafk','Max','Maz','Mxi1','Nelfe','Nfe2','Nfya','Nfyb','Nrf1','P300','Pol2','Pol2s','Pol3','Rad21','Rfx5','Rpc155','Setdb1','Sirt6','Smc3','Stat1','Stat2','Tal1','Tblr1','Tbp','Tf3c','Tr4Ucd','Ubfsc13125','Ubtf','Usf2','Xrcc4','Yy1','Zc3h11anb','Znf143','Znf263','Znf274','Znf384','Znfmizd','Bach1','Ccne1','Cdkn1','Efos','Egata2','Ehdac8','Ejunb','Ejund','Elf1','Enr4','Esr','Ilf2','Mml5','Ncor1','Nf90','Stat1','Atf3','Bdp1','E2f4','E2f6','Gata1','Gata2','Brf1','Brf3','Brg1','Setdb1','Tr4','Yy1','Znf263','Znf274','Cfos','Cjun','Cmyc','Cmyc','Pol2','Stat1','Stat2','Cjun','Cmyc','Pol2','Stat1','Stat2','Cjun','Pol2','Cjun','Cmyc','Pol2','Inil','Jund','Max','Nelfe','Nfe2','Nfya','Pol2','Pol3','Rad21','Rpc155','Sirt6','Stat1','Tfiiic','Xrcc4','Znf263','Mll5')
+tfnames=unique(tolower(tfnames))
+tfnames=tfnames[order(nchar(tfnames))]
+nameind = rep(-1,length(chipnames))
+for(tfn in tfnames){
+    nameind[grep(tfn,chipnames,ignore.case=T)]=tfn
+}
+tfnames=sort(unique(nameind))
+
+allchip=do.call(c,chip)
+
+lfpiq=list.files(piqdir,pattern='all.csv')
+pwms=readLines(paste0(piqdir,'/jasparfix.txt'))
+pwmname=pwms[seq(1,length(pwms),5)]
+
+require('snow')
+
+cl<-makeCluster(40)
+clusterCall(cl,function(){require('GenomicRanges')})
+clusterExport(cl,c('lfpiq','piqdir'))
+
+loadfun<-function(i){
+    print(i)
+    matches=lfpiq[grep(paste0('^',i,'-'),lfpiq)]
+    if(length(matches)>0){
+        piqin=do.call(c,lapply(matches,function(j){
+            din=read.csv(paste0(piqdir,j))
+                GRanges(substr(din[,2],4,10),IRanges(start=din$coord-10,width=20),pssm=din$pwm,score=din$score)
+        }))
+        rval=piqin[order(-score(piqin))]
+    }else{
+        rval=GRanges()
+    }
+    save(rval,file=paste0('piqcalls2/',i,'.RData'))
+    NULL
+}
+
+clusterApplyLB(cl,1:length(pwmname),loadfun)
+
+lfcent=list.files('centcalls',pattern='.csv')
+clusterExport(cl,c('lfcent'))
+loadfun.cent <- function(i){
+    print(i)
+    matches=lfcent[grep(paste0('^',i,'-'),lfcent)]
+    if(length(matches)>0){
+        piqin=do.call(c,lapply(matches,function(j){
+            din=read.csv(paste0('centcalls/',j))
+            GRanges(substr(din[,2],4,10),IRanges(start=din$coord-10,width=20),pssm=din$pwm,score=din$score)
+        }))
+        rval=piqin[order(-score(piqin))]
+    }else{
+        rval=GRanges()
+    }
+    save(rval,file=paste0('centcalls/',i,'.RData'))
+    NULL
+}
+
+clusterApplyLB(cl,1:length(pwmname),loadfun.cent)
+
+cl<-makeCluster(40)
+clusterCall(cl,function(){require('GenomicRanges')})
+save(chip,file='chip.RData')
+tn=clusterCall(cl,function(){base::eval(parse(text='load(\'chip.RData\')'),.GlobalEnv)})
+
+auc <- function(outcome, proba){
+    N = length(proba)
+    N_pos = as.double(sum(outcome))
+    op= order(-proba)
+    abv = as.double((1:N) - cumsum(outcome[op]))
+    return( 1- sum( abv * outcome[op] ) / (N_pos * (N-N_pos) ) )
+}
+
+clusterExport(cl,'auc')
+
+allcs=clusterApplyLB(cl,1:length(pwmname),function(i){
+  print(i)
+  load(paste0('piqcalls2/',i,'.RData'))
+  allisect=sapply(1:length(chip),function(j){
+      if(length(rval)>0){
+          isects=rval%over%chip[[j]]
+          c(sum(isects),length(rval),auc(as.double(isects),elementMetadata(rval)[,1]))
+      }else{
+          c(0,1,0)
+      }
+  })
+  save(allisect,file=paste0('intersections/',i,'.RData'))
+})
+
+x1=sapply(1:length(pwmname),function(i){
+    print(i)
+    str=paste0('intersections/',i,'.RData')
+    if(file.exists(str)){
+        load(str)
+        allisect[3,]
+    }else{
+        rep(0,length(chip))
+    }
+})
+
+x2=sapply(1:length(pwmname),function(i){
+  print(i)
+    str=paste0('intersections/',i,'.RData')
+  if(file.exists(str)){
+    load(str)
+    allisect[1,]
+  }else{
+    rep(0,length(chip))
+  }
+})
+
+mc=100
+pwm=sapply(tfnames,function(j){
+    subind=which(nameind==j)
+    candchip=grep(j,pwmname,ignore.case=T)
+    if(length(candchip)>0 & sum(x1[subind,candchip]>0.5)>1){
+        candchip[which.max(colSums(x1[subind,candchip,drop=F]))]
+    }else{
+        x1s = apply(x1[subind,,drop=F],2,min)
+        x2s = colMeans(x2[subind,,drop=F])/(colMeans(x2[-subind,,drop=F])+mc)
+        which(x1s>0.5)[which.max(x2s[which(x1s>0.5)])]
+    }
+})
+
+matchmat = data.frame(nameind,pwm[match(nameind,tfnames)])
+
+clusterExport(cl,'matchmat')
+
+piqaucs=clusterApplyLB(cl,1:length(chip),function(i){
+    print(i)
+    tchip=chip[[i]]
+    if(!is.na(matchmat[i,2])){
+        load(paste0('piqcalls2/',matchmat[i,2],'.RData'))
+        if(length(rval)>0){
+            isect=rval%over%tchip
+            c(length(tchip),sum(tchip%over%rval),auc(as.double(isect),elementMetadata(rval)[,1]),auc(as.double(isect),elementMetadata(rval)[,2]))
+        }else{
+            c(NA,NA)
+        }
+    }else{
+        c(NA,NA)
+    }
+})
+
+centaucs=clusterApplyLB(cl,1:length(chip),function(i){
+    print(i)
+    tchip=chip[[i]]
+    if(!is.na(matchmat[i,2])){
+        load(paste0('centcalls/',matchmat[i,2],'.RData'))
+        if(length(rval)>0){
+            isect=rval%over%tchip
+            auc(as.double(isect),elementMetadata(rval)[,2])
+        }else{
+            NA
+        }
+    }else{
+        NA
+    }
+})
+
+dfx = as.matrix(cbind(do.call(rbind,piqaucs),do.call(c,centaucs)))
+oncomp=dfx
+
+dfs=data.frame(chipname=chipnames,short=nameind,motifid=matchmat[,2],jaspar=pwmname[matchmat[,2]],num.sites=oncomp[,1],pwm.coverage=oncomp[,2]/oncomp[,1],pwm.auc=oncomp[,3],piq.auc=oncomp[,4],cent.auc=oncomp[,5])
+
+write.csv(dfs,'integration.test.csv')
+
+
+pdf('test.pdf')
+plot(oncomp[,3],oncomp[,4],xlab='pwm',ylab='piq')
+abline(a=0,b=1)
+plot(oncomp[,4],oncomp[,5],xlab='piq',ylab='cent')
+abline(a=0,b=1)
+dev.off()
+
+###
+# ctcf example
+
+i=17
+tchip=chip[[i]]
+load(paste0('piqcalls2/',matchmat[i,2],'.RData'))
+sum(rval%over%tchip)/length(rval)
+sum(tchip%over%rval)/length(tchip)
+df2=data.frame(chr= paste0('chr',seqnames(rval)), start=start(rval),end=end(rval),pwm=elementMetadata(rval)[,1],onchip = isect)
+write.csv(df2,'ctcf-17-example.csv')
